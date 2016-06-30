@@ -97,15 +97,16 @@ export default class IOManager {
     }
     this.listeners = {};
   }
-  handleCallback(listenerId, data) {
+  handleCallback(listenerId, data, remove) {
     let listener = this.listeners[listenerId];
     // This can't happen! Still, try to ignore it.
     if (listener == null) return;
     if (this.handler != null) {
       return this.handler(listener, data);
     }
-    // Remove the listener if once is true.
-    if (listener.once) {
+    // Remove the listener if once is true, or remove is true.
+    // Remove indicates that the listener won't call the callback again.
+    if (listener.once || remove === true) {
       this.cancel(listener.id);
     }
     // Create AST, then run that through interpreter.
