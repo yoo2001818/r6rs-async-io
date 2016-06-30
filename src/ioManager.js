@@ -1,16 +1,42 @@
 import DefaultResolver from './defaultResolver';
-import { PAIR, STRING, PROCEDURE, assert, PairValue } from 'r6rs';
+import { PAIR, STRING, PROCEDURE, NUMBER, assert,
+  PairValue, NativeProcedureValue, NumberValue, BooleanValue } from 'r6rs';
 
 export default class IOManager {
-  constructor(machine, resolver = new DefaultResolver(), handler) {
+  constructor(machine, resolver = new DefaultResolver(), handler,
+    errorHandler
+  ) {
     this.machine = machine;
     this.resolver = resolver;
     this.handler = handler;
+    this.errorHandler = errorHandler;
     // The incrementing ID to be bound as listener's ID.
     this.listenerId = 0;
     // The listener list - A flat object structure that contains listeners
     // with their ID as key.
     this.listeners = {};
+  }
+  // Returns the Scheme-side adapter (library) suitable to load with
+  // machine.loadLibrary(library);
+  getLibrary() {
+    return [
+      new NativeProcedureValue('io-listen', list => {
+        let listener = this.listen(list);
+        return new NumberValue(listener.id);
+      }),
+      new NativeProcedureValue('io-once', list => {
+        let listener = this.once(list);
+        return new NumberValue(listener.id);
+      }),
+      new NativeProcedureValue('io-exec', list => {
+        let listener = this.once(list);
+        return new NumberValue(listener.id);
+      }),
+      new NativeProcedureValue('io-cancel', list => {
+        assert(list.car, NUMBER);
+        return new BooleanValue(this.cancel(list.car.value));
+      })
+    ];
   }
   addListener(listener) {
     this.listeners[listener.id] = listener;
@@ -55,10 +81,11 @@ export default class IOManager {
   }
   cancel(listenerId) {
     let listener = this.listeners[listenerId];
-    if (listener == null) return;
+    if (listener == null) return false;
     // Directive may not support listener cancelling at all
     if (listener.cancel) listener.cancel();
     delete this.listeners[listenerId];
+    return true;
   }
   // This is called when interpreter itself is being removed, etc..
   cancelAll() {
@@ -82,7 +109,17 @@ export default class IOManager {
       this.cancel(listener.id);
     }
     // Create AST, then run that through interpreter.
+    // TODO: If an error happens inside this evaluation, Node process will be
+    // turned off!!! This try-catch provides a way to process the error.
     let pair = new PairValue(listener.callback, data);
-    return this.machine.evaluate(pair, true);
+    try {
+      return this.machine.evaluate(pair, true);
+    } catch (e) {
+      if (typeof this.errorHandler === 'function') {
+        return this.errorHandler(e);
+      }
+      // We're out of luck - user didn't specify error handler. Just give up...
+      throw e;
+    }
   }
 }
