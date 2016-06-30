@@ -20,7 +20,7 @@ export default class IOManager {
   // machine.loadLibrary(library);
   getLibrary() {
     return [
-      new NativeProcedureValue('io-listen', list => {
+      new NativeProcedureValue('io-on', list => {
         let listener = this.listen(list);
         return new NumberValue(listener.id);
       }),
