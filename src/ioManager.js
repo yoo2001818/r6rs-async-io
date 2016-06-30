@@ -1,6 +1,8 @@
 import DefaultResolver from './defaultResolver';
 import { PAIR, STRING, PROCEDURE, NUMBER, assert,
-  PairValue, NativeProcedureValue, NumberValue, BooleanValue } from 'r6rs';
+  PairValue, NativeProcedureValue, NumberValue, BooleanValue,
+  SymbolValue } from 'r6rs';
+import desugar from './returnDesugar';
 
 export default class IOManager {
   constructor(machine, resolver = new DefaultResolver(), handler,
@@ -112,7 +114,10 @@ export default class IOManager {
     // Create AST, then run that through interpreter.
     // TODO: If an error happens inside this evaluation, Node process will be
     // turned off!!! This try-catch provides a way to process the error.
-    let pair = new PairValue(listener.callback, data);
+    let dataVal = desugar(data);
+    dataVal = dataVal.map(v => new PairValue(new SymbolValue('quote'),
+      new PairValue(v)));
+    let pair = new PairValue(listener.callback, dataVal);
     try {
       return this.machine.evaluate(pair, true);
     } catch (e) {
