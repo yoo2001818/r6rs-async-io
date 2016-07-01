@@ -1,7 +1,7 @@
 {
-  "name": "locksmith-connector-ws",
-  "version": "0.1.0",
-  "description": "WebSocket connector for locksmith",
+  "name": "r6rs-async-io",
+  "version": "0.1.1",
+  "description": "Asynchronous IO interface for r6rs.js",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
