@@ -1,6 +1,6 @@
 {
   "name": "r6rs-async-io",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Asynchronous IO interface for r6rs.js",
   "main": "lib/index.js",
   "scripts": {
@@ -22,6 +22,6 @@
     "mocha": "^2.5.3"
   },
   "dependencies": {
-    "r6rs": "^0.1.5"
+    "r6rs": "^0.1.9"
   }
 }

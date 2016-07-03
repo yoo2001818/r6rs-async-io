@@ -25,19 +25,19 @@ export default class IOManager {
       new NativeProcedureValue('io-on', list => {
         let listener = this.listen(list);
         return new NumberValue(listener.id);
-      }),
+      }, ['name', 'options', 'callback']),
       new NativeProcedureValue('io-once', list => {
         let listener = this.once(list);
         return new NumberValue(listener.id);
-      }),
+      }, ['name', 'options', 'callback']),
       new NativeProcedureValue('io-exec', list => {
         let listener = this.once(list);
         return new NumberValue(listener.id);
-      }),
+      }, ['name', 'options', 'callback']),
       new NativeProcedureValue('io-cancel', list => {
         assert(list.car, NUMBER);
         return new BooleanValue(this.cancel(list.car.value));
-      })
+      }, ['listener'])
     ];
   }
   addListener(listener) {
