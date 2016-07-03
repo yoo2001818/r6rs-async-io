@@ -1,5 +1,5 @@
 import DefaultResolver from './defaultResolver';
-import { PAIR, STRING, PROCEDURE, NUMBER, assert,
+import { PAIR, STRING, PROCEDURE, NUMBER, SYMBOL, assert,
   PairValue, NativeProcedureValue, NumberValue, BooleanValue,
   SymbolValue } from 'r6rs';
 import desugar from './returnDesugar';
@@ -46,14 +46,17 @@ export default class IOManager {
   listen(params) {
     assert(params, PAIR);
     let eventName = params.car;
-    let eventOptions = params.cdr.car;
-    let callback = params.cdr.cdr.car;
-    // Only allow string for now.
-    assert(eventName, STRING);
+    let eventOptions = params.cdr && params.cdr.car;
+    let callback = params.cdr && params.cdr.cdr && params.cdr.cdr.car;
+    if (eventName == null || (eventName.type !== STRING &&
+      eventName.type !== SYMBOL
+    )) {
+      throw new Error('Event name must be string or symbol');
+    }
     // eventOptions is processed by resolver itself; we don't have to assert it.
     // We'd have to assert callback's arguments too - but let's don't do that
     // for now.
-    assert(callback, PROCEDURE);
+    if (callback != null) assert(callback, PROCEDURE);
     // Try to resolve the eventName through resolver.
     let directive = this.resolver.resolve(eventName.value);
     if (directive === null) {
@@ -115,8 +118,11 @@ export default class IOManager {
     // TODO: If an error happens inside this evaluation, Node process will be
     // turned off!!! This try-catch provides a way to process the error.
     let dataVal = desugar(data);
-    dataVal = dataVal.map(v => new PairValue(new SymbolValue('quote'),
-      new PairValue(v)));
+    if (dataVal) {
+      dataVal = dataVal.map(v => new PairValue(new SymbolValue('quote'),
+        new PairValue(v)));
+    }
+    if (listener.callback == null) return;
     let pair = new PairValue(listener.callback, dataVal);
     try {
       return this.machine.evaluate(pair, true);
