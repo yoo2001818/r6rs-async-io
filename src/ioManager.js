@@ -64,7 +64,7 @@ export default class IOManager {
       throw new Error('Unknown IO directive ' + eventName.value);
     }
     // Just silently ignore it if it returns false.
-    if (directive === false) return -1;
+    if (directive === false) return { id: -1 };
     if (typeof directive !== 'function') {
       throw new Error('Directive must be a function');
     }
