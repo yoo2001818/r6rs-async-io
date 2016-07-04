@@ -107,7 +107,7 @@ export default class IOManager {
     // This can't happen! Still, try to ignore it.
     if (listener == null) return;
     if (this.handler != null) {
-      return this.handler(listener, data);
+      return this.handler(listener, data, remove);
     }
     // Remove the listener if once is true, or remove is true.
     // Remove indicates that the listener won't call the callback again.
