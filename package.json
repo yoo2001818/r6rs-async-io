@@ -1,6 +1,6 @@
 {
   "name": "r6rs-async-io",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Asynchronous IO interface for r6rs.js",
   "main": "lib/index.js",
   "scripts": {

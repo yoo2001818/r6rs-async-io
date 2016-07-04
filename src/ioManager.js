@@ -71,7 +71,7 @@ export default class IOManager {
     // Create an listener...
     let listenerId = this.listenerId ++;
     let cancel = directive(eventOptions,
-      this.handleCallback.bind(this, listenerId), listenerId);
+      this.handleCallback.bind(this, listenerId), listenerId, this);
     let listener = {
       id: listenerId, cancel, name: eventName.value,
       options: eventOptions, callback
