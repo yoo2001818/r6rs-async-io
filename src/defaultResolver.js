@@ -1,4 +1,5 @@
 import Library from './library';
+import { SYMBOL, STRING } from 'r6rs';
 
 export default class DefaultResolver {
   constructor(directives = {}) {
@@ -18,6 +19,11 @@ export default class DefaultResolver {
     this.directives[name] = directive;
   }
   resolve(keyword) {
-    return this.directives[keyword];
+    if (keyword == null || (keyword.type !== STRING &&
+      keyword.type !== SYMBOL
+    )) {
+      throw new Error('Event name must be string or symbol');
+    }
+    return this.directives[keyword.value];
   }
 }

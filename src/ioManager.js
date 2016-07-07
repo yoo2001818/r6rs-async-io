@@ -1,5 +1,5 @@
 import DefaultResolver from './defaultResolver';
-import { PAIR, STRING, PROCEDURE, NUMBER, SYMBOL, assert,
+import { PAIR, PROCEDURE, NUMBER, assert,
   PairValue, NativeProcedureValue, NumberValue, BooleanValue,
   SymbolValue } from 'r6rs';
 import desugar from './returnDesugar';
@@ -52,20 +52,15 @@ export default class IOManager {
     let eventName = params.car;
     let eventOptions = params.cdr && params.cdr.car;
     let callback = params.cdr && params.cdr.cdr && params.cdr.cdr.car;
-    if (eventName == null || (eventName.type !== STRING &&
-      eventName.type !== SYMBOL
-    )) {
-      throw new Error('Event name must be string or symbol');
-    }
     // eventOptions is processed by resolver itself; we don't have to assert it.
     // We'd have to assert callback's arguments too - but let's don't do that
     // for now.
     if (callback != null) assert(callback, PROCEDURE);
     // Try to resolve the eventName through resolver.
-    let directive = this.resolver.resolve(eventName.value);
+    let directive = this.resolver.resolve(eventName);
     if (directive === null) {
       // Missing directive; throw an error.
-      throw new Error('Unknown IO directive ' + eventName.value);
+      throw new Error('Unknown IO directive ' + eventName.inspect());
     }
     // Just silently ignore it if it returns false.
     if (directive === false) return { id: -1 };
