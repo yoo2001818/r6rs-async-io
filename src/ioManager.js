@@ -20,23 +20,27 @@ export default class IOManager {
   }
   // Returns the Scheme-side adapter (library) suitable to load with
   // machine.loadLibrary(library);
-  getLibrary() {
+  // However, since the machine supports library caching, it's not possible to
+  // use scopes to reference IOManager anymore - injecting asyncIO value into
+  // machine works.
+  getLibrary(machine = this.machine) {
+    machine.asyncIO = this;
     return [
-      new NativeProcedureValue('io-on', list => {
-        let listener = this.listen(list);
+      new NativeProcedureValue('io-on', (list, machine) => {
+        let listener = machine.asyncIO.listen(list);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback']),
-      new NativeProcedureValue('io-once', list => {
-        let listener = this.once(list);
+      new NativeProcedureValue('io-once', (list, machine) => {
+        let listener = machine.asyncIO.once(list);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback']),
-      new NativeProcedureValue('io-exec', list => {
-        let listener = this.once(list);
+      new NativeProcedureValue('io-exec', (list, machine) => {
+        let listener = machine.asyncIO.once(list);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback']),
-      new NativeProcedureValue('io-cancel', list => {
+      new NativeProcedureValue('io-cancel', (list, machine) => {
         assert(list.car, NUMBER);
-        return new BooleanValue(this.cancel(list.car.value));
+        return new BooleanValue(machine.asyncIO.cancel(list.car.value));
       }, ['listener'])
     ];
   }
