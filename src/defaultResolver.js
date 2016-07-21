@@ -1,4 +1,3 @@
-import Library from './library';
 import { SYMBOL, STRING } from 'r6rs';
 
 export default class DefaultResolver {
@@ -7,7 +6,7 @@ export default class DefaultResolver {
     this.directives = directives;
   }
   addLibrary(directives) {
-    if (directives instanceof Library) {
+    if (directives.data != null && directives.name != null) {
       this.addLibrary(directives.data);
       return;
     }
