@@ -29,19 +29,19 @@ export default class IOManager {
       new NativeProcedureValue('io-on', (list, machine) => {
         let listener = machine.asyncIO.listen(list);
         return new NumberValue(listener.id);
-      }, ['name', 'options', 'callback']),
+      }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-once', (list, machine) => {
         let listener = machine.asyncIO.once(list);
         return new NumberValue(listener.id);
-      }, ['name', 'options', 'callback']),
+      }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-exec', (list, machine) => {
         let listener = machine.asyncIO.once(list);
         return new NumberValue(listener.id);
-      }, ['name', 'options', 'callback']),
+      }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-cancel', (list, machine) => {
         assert(list.car, NUMBER);
         return new BooleanValue(machine.asyncIO.cancel(list.car.value));
-      }, ['listener'])
+      }, ['listener'], undefined, 'async-io')
     ];
   }
   addListener(listener) {
