@@ -69,18 +69,20 @@ export default class IOManager {
       throw new Error('Directive must be a function');
     }
     // Create an listener...
+    let listener = {
+      name: eventName.value,
+      options: eventOptions, callback
+    };
     let listenerId;
     if (this.idHandler) {
-      listenerId = this.idHandler(frame, params, eventName, callback);
+      listenerId = this.idHandler(frame, listener, params, eventName, callback);
     } else {
       listenerId = this.listenerId ++;
     }
     let cancel = directive(eventOptions,
       this.handleCallback.bind(this, listenerId), listenerId, this);
-    let listener = {
-      id: listenerId, cancel, name: eventName.value,
-      options: eventOptions, callback
-    };
+    listener.id = listenerId;
+    listener.cancel = cancel;
     this.addListener(listener);
     return listener;
   }
