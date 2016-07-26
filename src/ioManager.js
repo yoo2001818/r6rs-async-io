@@ -6,12 +6,13 @@ import desugar from './returnDesugar';
 
 export default class IOManager {
   constructor(machine, resolver = new DefaultResolver(), handler,
-    errorHandler
+    errorHandler, idHandler
   ) {
     this.machine = machine;
     this.resolver = resolver;
     this.handler = handler;
     this.errorHandler = errorHandler;
+    this.idHandler = idHandler;
     // The incrementing ID to be bound as listener's ID.
     this.listenerId = 0;
     // The listener list - A flat object structure that contains listeners
@@ -26,16 +27,16 @@ export default class IOManager {
   getLibrary(machine = this.machine) {
     machine.asyncIO = this;
     return [
-      new NativeProcedureValue('io-on', (list, machine) => {
-        let listener = machine.asyncIO.listen(list);
+      new NativeProcedureValue('io-on', (list, machine, frame) => {
+        let listener = machine.asyncIO.listen(list, frame);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
-      new NativeProcedureValue('io-once', (list, machine) => {
-        let listener = machine.asyncIO.once(list);
+      new NativeProcedureValue('io-once', (list, machine, frame) => {
+        let listener = machine.asyncIO.once(list, frame);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
-      new NativeProcedureValue('io-exec', (list, machine) => {
-        let listener = machine.asyncIO.once(list);
+      new NativeProcedureValue('io-exec', (list, machine, frame) => {
+        let listener = machine.asyncIO.once(list, frame);
         return new NumberValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-cancel', (list, machine) => {
@@ -47,7 +48,7 @@ export default class IOManager {
   addListener(listener) {
     this.listeners[listener.id] = listener;
   }
-  listen(params) {
+  listen(params, frame) {
     assert(params, PAIR);
     let eventName = params.car;
     let eventOptions = params.cdr && params.cdr.car;
@@ -68,7 +69,12 @@ export default class IOManager {
       throw new Error('Directive must be a function');
     }
     // Create an listener...
-    let listenerId = this.listenerId ++;
+    let listenerId;
+    if (this.idHandler) {
+      listenerId = this.idHandler(frame, params, eventName, callback);
+    } else {
+      listenerId = this.listenerId ++;
+    }
     let cancel = directive(eventOptions,
       this.handleCallback.bind(this, listenerId), listenerId, this);
     let listener = {
@@ -78,8 +84,8 @@ export default class IOManager {
     this.addListener(listener);
     return listener;
   }
-  once(params) {
-    let listener = this.listen(params);
+  once(params, frame) {
+    let listener = this.listen(params, frame);
     listener.once = true;
     return listener;
   }
