@@ -1,6 +1,6 @@
 import DefaultResolver from './defaultResolver';
-import { PAIR, PROCEDURE, NUMBER, assert,
-  PairValue, NativeProcedureValue, NumberValue, BooleanValue,
+import { PAIR, PROCEDURE, SYMBOL, assert,
+  PairValue, NativeProcedureValue, BooleanValue,
   SymbolValue } from 'r6rs';
 import desugar from './returnDesugar';
 
@@ -29,18 +29,18 @@ export default class IOManager {
     return [
       new NativeProcedureValue('io-on', (list, machine, frame) => {
         let listener = machine.asyncIO.listen(list, frame);
-        return new NumberValue(listener.id);
+        return new SymbolValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-once', (list, machine, frame) => {
         let listener = machine.asyncIO.once(list, frame);
-        return new NumberValue(listener.id);
+        return new SymbolValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-exec', (list, machine, frame) => {
         let listener = machine.asyncIO.once(list, frame);
-        return new NumberValue(listener.id);
+        return new SymbolValue(listener.id);
       }, ['name', 'options', 'callback'], undefined, 'async-io'),
       new NativeProcedureValue('io-cancel', (list, machine) => {
-        assert(list.car, NUMBER);
+        assert(list.car, SYMBOL);
         return new BooleanValue(machine.asyncIO.cancel(list.car.value));
       }, ['listener'], undefined, 'async-io')
     ];
